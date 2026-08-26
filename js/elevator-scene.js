@@ -74,9 +74,7 @@
 
   var renderer, scene, camera, group, clock, rafId;
   var materials = {}, geometries = [];
-  var isIntersecting = true;
-  var isHidden = document.hidden;
-  
+    
   var targetScrollProgress = 0;
   var currentScrollProgress = 0;
   var curFloor = 0;
@@ -367,7 +365,7 @@
   }
 
   window.addEventListener('scroll', function() {
-    if (!isHidden && isIntersecting) updateScrollProgress();
+    updateScrollProgress();
   }, { passive: true });
 
   window.addEventListener('mousemove', function(e) {
@@ -418,22 +416,13 @@
   }
 
   // Pausing Engine offscreen
-  if ('IntersectionObserver' in window) {
-    var io = new IntersectionObserver(function(entries) {
-      isIntersecting = entries[0].isIntersecting;
-      if (isIntersecting && !isHidden) updateScrollProgress();
-    }, { rootMargin: '0px' });
-    io.observe(track);
-  }
+  
 
-  document.addEventListener('visibilitychange', function() {
-    isHidden = document.hidden;
-    if (!isHidden && isIntersecting) updateScrollProgress();
-  });
+  
 
   function frame() {
     rafId = requestAnimationFrame(frame);
-    if (!scene || !camera || !renderer || isHidden || !isIntersecting) return;
+    if (!scene || !camera || !renderer) return;
 
     var t = clock.getElapsedTime();
 
