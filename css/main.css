@@ -3300,3 +3300,73 @@ footer {
   }
 }
 
+
+/* RESPONSIVE QA FIXES - ENSURE NO HORIZONTAL OVERFLOW & SAFE ZONES */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Mobile Hero Composition Two-Zone Architecture */
+@media (max-width: 767px) {
+  #heroPin {
+    height: 100vh;
+    height: 100dvh;
+    position: relative;
+    /* Prevent content from overlapping the elevator model (upper 55%) */
+  }
+  #heroGL {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+  .hero-scrim {
+    /* Only darken the lower 45% where text sits, leaving 3D model bright at top */
+    background: linear-gradient(to top, rgba(14,16,19,0.95) 0%, rgba(14,16,19,0.85) 45%, rgba(14,16,19,0) 55%, transparent 100%);
+    z-index: 2;
+  }
+  .hero-s {
+    position: absolute;
+    bottom: 5vh;
+    left: 0;
+    width: 100%;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 2rem;
+  }
+  .hero-s .container {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+  
+  /* Ensure form inputs have min 16px to prevent iOS auto-zoom */
+  input, select, textarea {
+    font-size: 16px !important;
+    min-height: 48px;
+  }
+
+  /* Safe Area padding for action bar on mobile */
+  body {
+    padding-bottom: env(safe-area-inset-bottom, 80px);
+  }
+
+  /* Word break to prevent long emails or URLs from causing overflow */
+  a, p {
+    word-break: break-word;
+  }
+}
+
+/* Fix mobile menu body lock */
+body.menu-open {
+  overflow: hidden;
+}
+
+/* Fluid typography base */
+html {
+  font-size: clamp(14px, 1.2vw + 10px, 16px);
+}

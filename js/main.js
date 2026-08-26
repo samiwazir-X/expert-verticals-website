@@ -544,18 +544,47 @@
         email: (form.querySelector('[name="email"]') || {}).value || ''
       });
 
-      // Simulate transmission with complete feedback
-      setTimeout(function() {
+      // FORM ENDPOINT CONFIGURATION REQUIRED
+      // Please replace this URL with your actual static form provider endpoint (e.g., Formspree, Web3Forms).
+      var formEndpoint = 'FORM_ENDPOINT_CONFIGURATION_REQUIRED';
+
+      if (formEndpoint === 'FORM_ENDPOINT_CONFIGURATION_REQUIRED') {
+        setTimeout(function() {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = origBtnHtml;
+          }
+          // Do not fake success; throw explicit configuration error.
+          showToast('Form endpoint configuration required. Please email us directly at info@theexpert.pk in the meantime.');
+        }, 800);
+        return;
+      }
+
+      // If configured, use fetch to submit
+      var formData = new FormData(form);
+      fetch(formEndpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      }).then(function(response) {
+        if (response.ok) {
+          form.reset();
+          if (fileNameSpan) fileNameSpan.textContent = 'Choose file…';
+          form.querySelectorAll('.fg.err').forEach(function(f) { f.classList.remove('err'); });
+          showToast('Thank You. Your enquiry has been received. The Expert Verticals team will review and respond shortly.');
+        } else {
+          showToast('There was a problem submitting your form. Please try again or email us.');
+        }
+      }).catch(function(error) {
+        showToast('Network error. Please check your connection and try again.');
+      }).finally(function() {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHtml;
         }
-        form.reset();
-        if (fileNameSpan) fileNameSpan.textContent = 'Choose file…';
-        form.querySelectorAll('.fg.err').forEach(function(f) { f.classList.remove('err'); });
-
-        showToast('Thank You. Your enquiry has been received. The Expert Verticals team will review and respond shortly.');
-      }, 1000);
+      });
     });
   });
 
