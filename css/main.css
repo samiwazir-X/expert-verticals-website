@@ -3304,7 +3304,6 @@ footer {
 /* RESPONSIVE QA FIXES - ENSURE NO HORIZONTAL OVERFLOW & SAFE ZONES */
 html, body {
   max-width: 100%;
-  overflow-x: hidden;
 }
 
 /* Mobile Hero Composition Two-Zone Architecture */
@@ -3312,7 +3311,6 @@ html, body {
   #heroPin {
     height: 100vh;
     height: 100dvh;
-    position: relative;
     /* Prevent content from overlapping the elevator model (upper 55%) */
   }
   #heroGL {
