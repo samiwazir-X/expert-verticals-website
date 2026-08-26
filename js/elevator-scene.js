@@ -100,15 +100,6 @@
       });
       scene.clear();
     }
-    if (renderer) {
-      renderer.dispose();
-      var ctx = renderer.getContext();
-      if (ctx && typeof ctx.getExtension === 'function') {
-        var loseCtx = ctx.getExtension('WEBGL_lose_context');
-        if (loseCtx) loseCtx.loseContext();
-      }
-      renderer = null;
-    }
     cables = [];
     indicators = [];
   }
@@ -151,16 +142,34 @@
     currentBp = getBreakpoint(winW);
     config = SCENE_CONFIG[currentBp];
 
-    if (!initRenderer()) return;
+    if (!renderer) {
+      if (!initRenderer()) return;
+    } else {
+      // Just update size/dpr if renderer exists
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, config.dpr));
+      var winW = pin.clientWidth || window.innerWidth;
+      var winH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      renderer.setSize(winW, winH, false);
+    }
 
     document.body.classList.remove('no3d');
 
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0e1013);
-    scene.fog = new THREE.Fog(0x0e1013, 14, 56);
-
+    if (!scene) {
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0e1013);
+      scene.fog = new THREE.Fog(0x0e1013, 14, 56);
+    }
+    
+    var winW = pin.clientWidth || window.innerWidth;
     var winH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-    camera = new THREE.PerspectiveCamera(config.fov, winW / winH, 0.1, 150);
+    
+    if (!camera) {
+      camera = new THREE.PerspectiveCamera(config.fov, winW / winH, 0.1, 150);
+    } else {
+      camera.fov = config.fov;
+      camera.aspect = winW / winH;
+      camera.updateProjectionMatrix();
+    }
 
     materials = {
       steel: new THREE.MeshStandardMaterial({ color: 0xc8d1da, metalness: 0.94, roughness: 0.24 }),
