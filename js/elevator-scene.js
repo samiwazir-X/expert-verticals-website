@@ -1,6 +1,7 @@
 /**
  * EXPERT VERTICALS — ADVANCED THREE.JS 3D ELEVATOR CUTAWAY
  * High-performance, scroll-driven interactive 3D hoistway experience
+ * Fully responsive for Mobile, Tablet, Laptop, Desktop & Ultra-wide
  */
 (function() {
   'use strict';
@@ -15,8 +16,8 @@
     if (!track || !pin || !canvas) return;
 
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
-    var isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+    var isMobile = (window.innerWidth <= 768);
+    var isTablet = (window.innerWidth > 768 && window.innerWidth <= 1024);
 
     var scenes = [
       document.querySelector('.s1'),
@@ -72,8 +73,10 @@
       return;
     }
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.5 : 2));
-    renderer.setSize(pin.clientWidth || window.innerWidth, pin.clientHeight || window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.75 : 2));
+    var winW = pin.clientWidth || window.innerWidth;
+    var winH = pin.clientHeight || window.innerHeight;
+    renderer.setSize(winW, winH, false);
     renderer.outputEncoding = THREE.sRGBEncoding;
 
     // Remove no3d if previously added
@@ -81,27 +84,31 @@
 
     var scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0e1013);
-    scene.fog = new THREE.Fog(0x0e1013, 14, 52);
+    scene.fog = new THREE.Fog(0x0e1013, 14, 56);
 
-    var camera = new THREE.PerspectiveCamera(40, (pin.clientWidth || window.innerWidth) / (pin.clientHeight || window.innerHeight), 0.1, 150);
+    var camera = new THREE.PerspectiveCamera(
+      isMobile ? 48 : 40,
+      winW / winH,
+      0.1,
+      150
+    );
 
     // ============ MATERIALS ============
-    var matSteel = new THREE.MeshStandardMaterial({ color: 0xb5bec7, metalness: 0.92, roughness: 0.28 });
-    var matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x1c1f24, metalness: 0.75, roughness: 0.45 });
-    var matStructure = new THREE.MeshStandardMaterial({ color: 0x14171a, metalness: 0.6, roughness: 0.7 });
-    var matGlass = new THREE.MeshStandardMaterial({ color: 0xbcd3e0, metalness: 0.95, roughness: 0.05, transparent: true, opacity: 0.22 });
-    var matRed = new THREE.MeshStandardMaterial({ color: 0xE31E24, emissive: 0xE31E24, emissiveIntensity: 0.75 });
-    var matRedGlow = new THREE.MeshStandardMaterial({ color: 0xE31E24, emissive: 0xE31E24, emissiveIntensity: 1.2 });
-    var matLamp = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.0 });
+    var matSteel = new THREE.MeshStandardMaterial({ color: 0xc8d1da, metalness: 0.94, roughness: 0.24 });
+    var matDarkMetal = new THREE.MeshStandardMaterial({ color: 0x181b1f, metalness: 0.8, roughness: 0.4 });
+    var matStructure = new THREE.MeshStandardMaterial({ color: 0x121417, metalness: 0.6, roughness: 0.75 });
+    var matGlass = new THREE.MeshStandardMaterial({ color: 0xcce0ec, metalness: 0.96, roughness: 0.05, transparent: true, opacity: 0.28 });
+    var matRed = new THREE.MeshStandardMaterial({ color: 0xE31E24, emissive: 0xE31E24, emissiveIntensity: 0.85 });
+    var matRedGlow = new THREE.MeshStandardMaterial({ color: 0xE31E24, emissive: 0xE31E24, emissiveIntensity: 1.4 });
+    var matLamp = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 1.2 });
     var matFloor = new THREE.MeshStandardMaterial({ color: 0x22262b, metalness: 0.35, roughness: 0.8 });
 
     var FH = 3.2, HX = 1.5, HZ = 1.45, totalH = (FLOORS - 1) * FH;
     var group = new THREE.Group();
     scene.add(group);
 
-    // Center offset to place shaft nicely on the right on desktop, centered on mobile
-    var shaftOffsetX = isMobile ? 0 : 1.35;
-    group.position.x = shaftOffsetX;
+    // Position shaft centered on mobile, right-aligned on desktop
+    group.position.x = isMobile ? 0 : 1.35;
 
     // ============ HOISTWAY SHAFT STRUCTURE ============
     // Back Wall
@@ -109,7 +116,7 @@
     backWall.position.set(0, totalH / 2, -HZ - 0.95);
     group.add(backWall);
 
-    // Side structural columns and beams
+    // Side structural columns
     [-1, 1].forEach(function(s) {
       var sideWall = new THREE.Mesh(new THREE.BoxGeometry(0.18, totalH + 8, HZ * 2 + 0.8), matStructure);
       sideWall.position.set(s * (HX + 0.65), totalH / 2, 0);
@@ -225,7 +232,7 @@
     car.add(ceilingLamp);
 
     // Warm Interior Point Light
-    var interiorLight = new THREE.PointLight(0xffffff, 1.2, 8);
+    var interiorLight = new THREE.PointLight(0xffffff, isMobile ? 1.5 : 1.3, 10);
     interiorLight.position.set(0, carH - 0.35, 0);
     car.add(interiorLight);
 
@@ -270,17 +277,17 @@
     group.add(doorR);
 
     // ============ LIGHTING ============
-    scene.add(new THREE.HemisphereLight(0x9cb6c8, 0x121518, 0.7));
+    scene.add(new THREE.HemisphereLight(0x9cb6c8, 0x121518, 0.8));
 
-    var keyLight = new THREE.DirectionalLight(0xffffff, 1.1);
-    keyLight.position.set(6, 12, 10);
+    var keyLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    keyLight.position.set(6, 14, 10);
     scene.add(keyLight);
 
-    var rimLight = new THREE.DirectionalLight(0xE31E24, 0.65);
+    var rimLight = new THREE.DirectionalLight(0xE31E24, 0.7);
     rimLight.position.set(-6, totalH * 0.5, -6);
     scene.add(rimLight);
 
-    var fillLight = new THREE.PointLight(0x8fa8bb, 0.5, 40);
+    var fillLight = new THREE.PointLight(0x8fa8bb, 0.6, 45);
     fillLight.position.set(4, totalH * 0.5, 8);
     scene.add(fillLight);
 
@@ -292,8 +299,9 @@
     var currentScrollProgress = 0;
     var mouseX = 0, mouseY = 0;
 
-    // Mouse parallax tracking
+    // Mouse parallax on desktop
     window.addEventListener('mousemove', function(e) {
+      if (isMobile) return;
       mouseX = (e.clientX / window.innerWidth - 0.5) * 0.4;
       mouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
     }, { passive: true });
@@ -302,16 +310,22 @@
       if (!pin || !renderer) return;
       var w = pin.clientWidth || window.innerWidth;
       var h = pin.clientHeight || window.innerHeight;
+      isMobile = w <= 768;
+      
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
+      camera.fov = isMobile ? 48 : 40;
       camera.updateProjectionMatrix();
       
-      // Center or offset shaft based on screen width
-      isMobile = w <= 768;
+      // Center shaft on mobile, offset right on desktop
       group.position.x = isMobile ? 0 : 1.35;
     }
 
     window.addEventListener('resize', resize, { passive: true });
+    window.addEventListener('orientationchange', function() {
+      setTimeout(resize, 200);
+    }, { passive: true });
+
     resize();
 
     var sceneRanges = [
@@ -329,8 +343,8 @@
       var max = track.offsetHeight - window.innerHeight;
       targetScrollProgress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
       
-      // Smooth linear interpolation for buttery motion
-      currentScrollProgress += (targetScrollProgress - currentScrollProgress) * 0.12;
+      // Smooth linear interpolation
+      currentScrollProgress += (targetScrollProgress - currentScrollProgress) * (isMobile ? 0.18 : 0.12);
 
       // Car Vertical Travel
       var carBaseY = 1.35;
@@ -356,21 +370,21 @@
       // Counterweight reciprocal downward travel
       cw.position.y = totalH - currentScrollProgress * maxTravel + 1.1;
 
-      // Camera dynamic tracking
+      // Camera dynamic tracking optimized for mobile framing
       var camTargetX = group.position.x + (isMobile ? 0 : 0.4) + mouseX;
-      var camTargetY = carY + 0.8 - mouseY;
-      var camTargetZ = 6.2;
+      var camTargetY = isMobile ? (carY + 1.25) : (carY + 0.8 - mouseY);
+      var camTargetZ = isMobile ? 8.2 : 6.2;
 
       camera.position.x += (camTargetX - camera.position.x) * 0.1;
       camera.position.y += (camTargetY - camera.position.y) * 0.1;
       camera.position.z = camTargetZ;
-      camera.lookAt(group.position.x, carY + 0.6, 0);
+      camera.lookAt(group.position.x, isMobile ? (carY + 0.95) : (carY + 0.6), 0);
 
       // Floor indicators glow when car arrives
       var carFloorF = currentScrollProgress * (FLOORS - 1);
       indicators.forEach(function(indMesh, i) {
         var d = Math.abs(i - carFloorF);
-        indMesh.material.emissiveIntensity = d < 0.65 ? 1.4 : 0.15;
+        indMesh.material.emissiveIntensity = d < 0.65 ? 1.5 : 0.15;
       });
 
       // Update story captions
