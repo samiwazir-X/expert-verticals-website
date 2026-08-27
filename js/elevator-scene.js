@@ -117,7 +117,7 @@
     
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, config.dpr));
     var winW = pin.clientWidth || window.innerWidth;
-    var winH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var winH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
     renderer.setSize(winW, winH, false);
     renderer.outputEncoding = THREE.sRGBEncoding;
 
@@ -146,7 +146,7 @@
       // Just update size/dpr if renderer exists
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, config.dpr));
       var winW = pin.clientWidth || window.innerWidth;
-      var winH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      var winH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
       renderer.setSize(winW, winH, false);
     }
 
@@ -159,7 +159,7 @@
     }
     
     var winW = pin.clientWidth || window.innerWidth;
-    var winH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var winH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
     
     if (!camera) {
       camera = new THREE.PerspectiveCamera(config.fov, winW / winH, 0.1, 150);
@@ -356,7 +356,7 @@
   }
 
   function updateScrollProgress() {
-    var viewH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    var viewH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
     var rect = track.getBoundingClientRect();
     // Scroll progress strictly relative to track geometry
     var travel = Math.max(1, track.offsetHeight - viewH);
@@ -380,7 +380,7 @@
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(function() {
         var w = pin.clientWidth || window.innerWidth;
-        var h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var h = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
         var newBp = getBreakpoint(w);
         
         if (newBp !== currentBp) {
@@ -401,7 +401,7 @@
       if (resizeTimeout) clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(function() {
         var w = pin.clientWidth || window.innerWidth;
-        var h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var h = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
         var newBp = getBreakpoint(w);
         if (newBp !== currentBp) {
           buildScene();
@@ -427,6 +427,7 @@
     var t = clock.getElapsedTime();
 
     currentScrollProgress += (targetScrollProgress - currentScrollProgress) * (config.maxW <= 767 ? 0.18 : 0.12);
+    if (isNaN(currentScrollProgress)) currentScrollProgress = 0;
 
     var carBaseY = 1.35;
     var maxTravel = totalH;
