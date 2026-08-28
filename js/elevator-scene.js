@@ -82,7 +82,8 @@
 
   var car, doorL, doorR, cw, cables = [], indicators = [];
   var totalH, FH = 3.2;
-
+  var HX = 1.5, HZ = 1.45;
+  
   function disposeScene() {
     if (rafId) cancelAnimationFrame(rafId);
     if (scene) {
@@ -181,7 +182,7 @@
     };
 
     var FLOORS = config.floors;
-    var HX = 1.5, HZ = 1.45;
+    
     totalH = (FLOORS - 1) * FH;
 
     if (reel) {
