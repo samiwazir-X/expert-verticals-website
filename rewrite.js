@@ -1,4 +1,6 @@
-(function() {
+const fs = require('fs');
+
+const code = `(function() {
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
@@ -407,12 +409,12 @@
     cw.position.y = totalH - currentScrollProgress * maxTravel + 1.1;
 
     var camTargetX = config.x + (config.maxW <= 1024 ? 0 : 0.4) + mouseX;
-    var camTargetY = config.maxW <= 767 ? (carY - 0.2) : (carY + 0.8 - mouseY);
+    var camTargetY = config.maxW <= 767 ? (carY + 1.25) : (carY + 0.8 - mouseY);
 
     camera.position.x += (camTargetX - camera.position.x) * 0.1;
     camera.position.y += (camTargetY - camera.position.y) * 0.1;
     camera.position.z = config.z;
-    camera.lookAt(config.x, config.maxW <= 767 ? (carY - 0.5) : (carY + 0.6), 0);
+    camera.lookAt(config.x, config.maxW <= 767 ? (carY + 0.95) : (carY + 0.6), 0);
 
     var carFloorF = currentScrollProgress * (config.floors - 1);
     indicators.forEach(function(indMesh, i) {
@@ -447,3 +449,7 @@
     buildScene();
   }
 })();
+`;
+
+fs.writeFileSync('js/elevator-scene.js', code);
+console.log('Successfully rewrote elevator-scene.js');
