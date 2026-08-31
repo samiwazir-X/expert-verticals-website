@@ -12,7 +12,7 @@
   var plane, shaderMaterial;
   
   // FRAME SEQUENCE LOGIC
-  var TOTAL_FRAMES = 3; // UPDATE THIS TO YOUR TOTAL NUMBER OF FRAMES
+  var TOTAL_FRAMES = 240; // UPDATE THIS TO YOUR TOTAL NUMBER OF FRAMES
   var framesLoaded = 0;
   var frameImages = [];
   var seqCanvas = document.createElement('canvas');
@@ -131,7 +131,7 @@
       var img = new Image();
       img.crossOrigin = "anonymous";
       // Format: frame_0.webp, frame_1.webp, etc.
-      img.src = 'assets/sequence/frame_' + i + '.webp';
+      img.src = 'assets/sequence/frame-' + String(i + 1).padStart(4, '0') + '.webp';
       img.onload = function() {
         framesLoaded++;
         if (framesLoaded === TOTAL_FRAMES) {
