@@ -1,4 +1,6 @@
-(function() {
+const fs = require('fs');
+
+const code = `(function() {
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
@@ -364,8 +366,8 @@
       
       if (deltaP > 0.001) {
         ldDir.classList.remove('down');
-        
-        // Wait, typo  -> ldDir
+        ld it
+        // Wait, typo ld it -> ldDir
         ldDir.classList.add('up');
       } else if (deltaP < -0.001) {
         ldDir.classList.remove('up');
@@ -382,3 +384,7 @@
     init();
   }
 })();
+`;
+
+fs.writeFileSync('js/elevator-scene.js', code);
+console.log('js/elevator-scene.js successfully patched for frame sequences');
