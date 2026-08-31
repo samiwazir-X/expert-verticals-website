@@ -1,4 +1,6 @@
-(function() {
+const fs = require('fs');
+
+const code = `(function() {
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
@@ -413,3 +415,7 @@
     loadAssetsAndBuild();
   }
 })();
+`;
+
+fs.writeFileSync('js/elevator-scene.js', code);
+console.log('Elevator scene 2.5D integration completed.');
