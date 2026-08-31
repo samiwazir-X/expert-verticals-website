@@ -157,8 +157,9 @@
     
     imgTexture = new THREE.CanvasTexture(seqCanvas);
     imgTexture.encoding = THREE.sRGBEncoding;
-    imgTexture.minFilter = THREE.LinearMipmapLinearFilter;
+    imgTexture.minFilter = THREE.LinearFilter;
     imgTexture.magFilter = THREE.LinearFilter;
+    imgTexture.generateMipmaps = false;
     
     buildScene();
     pin.classList.add('hero-in');
@@ -222,14 +223,15 @@
     camera.position.z = 5;
 
     var geo = new THREE.PlaneGeometry(1, 1, 1, 1);
-    
-    
+
+    if (shaderMaterial) {
+      shaderMaterial.dispose();
+    }
+
     shaderMaterial = new THREE.MeshBasicMaterial({
       map: imgTexture,
       depthWrite: false
     });
-
-    }
 
     plane = new THREE.Mesh(geo, shaderMaterial);
     plane.scale.set(planeWidth, planeHeight, 1);
@@ -294,8 +296,9 @@
 
     // UPDATE FRAME SEQUENCE
     var targetFrame = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(p * (TOTAL_FRAMES - 1))));
-    if (targetFrame !== currentFrameIndex && frameImages[targetFrame]) {
-      seqCtx.drawImage(frameImages[targetFrame], 0, 0);
+    var targetImage = frameImages[targetFrame];
+    if (targetFrame !== currentFrameIndex && targetImage && targetImage.complete && targetImage.naturalWidth > 0) {
+      seqCtx.drawImage(targetImage, 0, 0);
       imgTexture.needsUpdate = true;
       currentFrameIndex = targetFrame;
     }
@@ -327,8 +330,6 @@
       
       if (deltaP > 0.001) {
         ldDir.classList.remove('down');
-        
-        // Wait, typo  -> ldDir
         ldDir.classList.add('up');
       } else if (deltaP < -0.001) {
         ldDir.classList.remove('up');
