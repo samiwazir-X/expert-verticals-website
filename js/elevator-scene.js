@@ -202,9 +202,7 @@
     if (plane) {
       plane.scale.set(planeWidth, planeHeight, 1);
     }
-    if (shaderMaterial) {
-      shaderMaterial.uniforms.uResolution.value.set(winW, winH);
-    }
+    
   }
 
   function buildScene() {
@@ -225,45 +223,12 @@
 
     var geo = new THREE.PlaneGeometry(1, 1, 1, 1);
     
-    var uniforms = {
-      tDiffuse: { value: imgTexture },
-      uProgress: { value: 0.0 },
-      uResolution: { value: new THREE.Vector2(winW, winH) }
-    };
+    
+    shaderMaterial = new THREE.MeshBasicMaterial({
+      map: imgTexture,
+      depthWrite: false
+    });
 
-    var vert = "varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }";
-    var frag = "uniform sampler2D tDiffuse; uniform float uProgress; uniform vec2 uResolution; varying vec2 vUv; " +
-               "float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); } " +
-               "void main() { " +
-               "vec4 texColor = texture2D(tDiffuse, vUv); " +
-               "float p = uProgress; " +
-               "float sweep = smoothstep(0.40, 0.62, p); " +
-               "float highlightPos = fract(p * 2.0 - vUv.x - vUv.y); " +
-               "float highlight = smoothstep(0.0, 0.05, highlightPos) * (1.0 - smoothstep(0.05, 0.15, highlightPos)); " +
-               "texColor.rgb += highlight * sweep * 0.10 * vec3(0.8, 0.9, 1.0); " +
-               "float redGlow = smoothstep(0.0, 0.18, p) * (1.0 - smoothstep(0.4, 0.6, p)); " +
-               "float destGlow = smoothstep(0.82, 1.0, p); " +
-               "float glowActive = max(redGlow, destGlow); " +
-               "float distInd = distance(vUv, vec2(0.75, 0.35 + p * 0.25)); " +
-               "float glowMask = smoothstep(0.1, 0.0, distInd); " +
-               "texColor.rgb += glowMask * glowActive * 0.6 * vec3(1.0, 0.1, 0.15); " +
-               "float fogInt = smoothstep(0.4, 1.0, p) * 0.25; " +
-               "vec3 fogColor = vec3(0.06, 0.07, 0.08); " +
-               "texColor.rgb = mix(texColor.rgb, fogColor, fogInt * (1.0 - vUv.y)); " +
-               "vec2 pos = (gl_FragCoord.xy / uResolution.xy) - vec2(0.5); " +
-               "float vignette = smoothstep(0.9, 0.3, length(pos)); " +
-               "texColor.rgb *= vignette; " +
-               "texColor.rgb += hash(gl_FragCoord.xy) * 0.025; " +
-               "gl_FragColor = texColor; " +
-               "}";
-
-    if (!shaderMaterial) {
-      shaderMaterial = new THREE.ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: vert,
-        fragmentShader: frag,
-        depthWrite: false
-      });
     }
 
     plane = new THREE.Mesh(geo, shaderMaterial);
@@ -335,9 +300,7 @@
       currentFrameIndex = targetFrame;
     }
 
-    if (shaderMaterial) {
-      shaderMaterial.uniforms.uProgress.value = p;
-    }
+    
 
     camera.position.x = fixedX;
     camera.position.y = 0;
