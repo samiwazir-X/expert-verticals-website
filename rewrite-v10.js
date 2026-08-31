@@ -1,4 +1,6 @@
-(function() {
+const fs = require('fs');
+
+const code = `(function() {
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
@@ -372,3 +374,7 @@
     init();
   }
 })();
+`;
+
+fs.writeFileSync('js/elevator-scene.js', code);
+console.log('js/elevator-scene.js patched for v10 (fully compliant)');

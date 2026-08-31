@@ -52,6 +52,11 @@ html {
   }
 }
 
+html, body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
 body {
   font-family: var(--body);
   font-size: clamp(15px, 1.1vw, 16.5px);
@@ -3400,4 +3405,29 @@ html {
 @media(max-width: 480px) {
   .hero-btns { flex-direction: column; width: 100%; gap: 12px; }
   .hero-btns .btn { width: 100%; text-align: center; }
+}
+
+.hero-s > p.lead {
+  color: #d8dcdf;
+  font-size: clamp(1rem, 1.35vw, 1.15rem);
+  max-width: 48ch;
+  line-height: 1.6;
+}
+@media (max-width: 767px) {
+  .hero-s > p.lead {
+    color: #c9ced2;
+    font-size: 0.9rem;
+    line-height: 1.48;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-s {
+    left: 0;
+    right: 0;
+    width: 100%;
+    padding-inline: 18px !important;
+    padding-bottom: calc(2rem + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: 2rem !important;
+  }
 }
