@@ -1,4 +1,6 @@
-(function() {
+const fs = require('fs');
+
+const code = `(function() {
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
@@ -482,3 +484,7 @@
     buildScene();
   }
 })();
+`;
+
+fs.writeFileSync('js/elevator-scene.js', code);
+console.log('Successfully upgraded elevator-scene.js to cinematic standards');
