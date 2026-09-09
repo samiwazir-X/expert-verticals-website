@@ -1,54 +1,16 @@
 (function() {
+  'use strict';
+
   var track = document.getElementById('heroTrack');
   var pin = document.getElementById('heroPin');
   var canvas = document.getElementById('heroGL');
   var reel = document.getElementById('floorReel');
   var ldDir = document.getElementById('ldDir');
 
-  var currentBp = null;
-  var config = null;
+  if (!track || !pin || !canvas) return;
 
-  var renderer, scene, camera, rafId;
-  var plane, shaderMaterial;
-  
-  // FRAME SEQUENCE LOGIC
-  var TOTAL_FRAMES = 240; // UPDATE THIS TO YOUR TOTAL NUMBER OF FRAMES
-  var framesLoaded = 0;
-  var frameImages = [];
-  var seqCanvas = document.createElement('canvas');
-  var seqCtx = seqCanvas.getContext('2d');
-  var imgTexture = null;
-  var currentFrameIndex = -1;
-    
-  var targetScrollProgress = 0;
-  var currentScrollProgress = 0;
-  var curFloor = 0;
-  var FLOORS = 7;
-  
-  var isIntersecting = true;
-  var isHidden = document.hidden;
-  
-  var winW, winH;
-  var planeWidth, planeHeight, fixedX;
-
-  var SCENE_CONFIG = {
-    mobileSmall: { maxW: 480, dpr: 1.25, smoothing: 0.14 },
-    mobileLarge: { maxW: 767, dpr: 1.25, smoothing: 0.14 },
-    tablet: { maxW: 1024, dpr: 1.5, smoothing: 0.12 },
-    desktop: { maxW: Infinity, dpr: 2.0, smoothing: 0.10 }
-  };
-
-  function getBreakpoint(w) {
-    if (w <= 480) return 'mobileSmall';
-    if (w <= 767) return 'mobileLarge';
-    if (w <= 1024) return 'tablet';
-    return 'desktop';
-  }
-
-  function smoothstep(min, max, value) {
-    var x = Math.max(0, Math.min(1, (value - min) / (max - min)));
-    return x * x * (3 - 2 * x);
-  }
+  var TOTAL_FRAMES = 240;
+  var FLOORS = 7; // G, 01, 02, 03, 04, 05, 06
 
   var scenes = [
     document.querySelector('.s1'),
@@ -66,189 +28,136 @@
     [0.82, 1.01]
   ];
 
-  function fallback() {
-    document.body.classList.add('no3d');
-    if (pin) pin.classList.add('hero-in');
-    if (canvas) canvas.style.display = 'none';
-    var hint = document.querySelector('.scroll-hint');
-    if (hint) hint.style.display = 'none';
-    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-    if (reel) reel.style.transform = 'translateY(0)';
+  var ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  // Pre-populate floor indicator if empty
+  if (reel && reel.children.length === 0) {
+    var labels = ['G', '01', '02', '03', '04', '05', '06'];
+    reel.innerHTML = labels.map(function(l) { return '<li>' + l + '</li>'; }).join('');
   }
 
-  function init() {
-    if (typeof THREE === 'undefined') {
-      fallback();
-      return;
-    }
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      fallback();
-      return;
-    }
+  // Preload frame storage
+  var frameImages = new Array(TOTAL_FRAMES);
+  var framesLoadedCount = 0;
+  var currentFrameIndex = -1;
+  var isInitialFrameReady = false;
 
-    if (reel && reel.children.length === 0) {
-      var labels = ['G', '01', '02', '03', '04', '05', '06'];
-      reel.innerHTML = labels.map(function(l) { return '<li>' + l + '</li>'; }).join('');
-    }
+  var targetScrollProgress = 0;
+  var currentScrollProgress = 0;
+  var curFloor = 0;
+  var lastDeltaP = 0;
 
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas: canvas,
-        antialias: false,
-        powerPreference: 'high-performance',
-        alpha: false
-      });
-    } catch (err) {
-      console.error("WebGL initialization failed", err);
-      fallback();
-      return;
-    }
+  var rafId = null;
+  var isIntersecting = true;
+  var isHidden = document.hidden || false;
 
+  var winW = 0;
+  var winH = 0;
+  var dpr = 1;
+
+  function getFrameUrl(idx) {
+    var num = String(idx + 1).padStart(4, '0');
+    return 'assets/sequence/frame-' + num + '.webp';
+  }
+
+  function resizeCanvas() {
     winW = pin.clientWidth || window.innerWidth;
     winH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
-    currentBp = getBreakpoint(winW);
-    config = SCENE_CONFIG[currentBp];
-    
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, config.dpr));
-    renderer.setSize(winW, winH, false);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    canvas.addEventListener('webglcontextlost', function(e) {
-      e.preventDefault();
-      if (rafId) cancelAnimationFrame(rafId);
-      fallback();
-    }, false);
+    canvas.width = Math.round(winW * dpr);
+    canvas.height = Math.round(winH * dpr);
+    canvas.style.width = winW + 'px';
+    canvas.style.height = winH + 'px';
 
-    canvas.addEventListener('webglcontextrestored', function() {
-      window.location.reload();
-    }, false);
-
-    loadFrameSequence();
-  }
-  
-  function loadFrameSequence() {
-    for (var i = 0; i < TOTAL_FRAMES; i++) {
-      var img = new Image();
-      img.crossOrigin = "anonymous";
-      // Format: frame_0.webp, frame_1.webp, etc.
-      img.src = 'assets/sequence/frame-' + String(i + 1).padStart(4, '0') + '.webp';
-      img.onload = function() {
-        framesLoaded++;
-        if (framesLoaded === TOTAL_FRAMES) {
-          onSequenceLoaded();
-        }
-      };
-      img.onerror = function(err) {
-        console.error("Failed to load frame", err);
-        fallback();
-      };
-      frameImages.push(img);
+    if (isInitialFrameReady && currentFrameIndex >= 0) {
+      drawCurrentFrame();
     }
   }
 
-  function onSequenceLoaded() {
-    // Set internal canvas to image dimensions
-    seqCanvas.width = frameImages[0].width;
-    seqCanvas.height = frameImages[0].height;
-    
-    // Draw initial frame
-    seqCtx.drawImage(frameImages[0], 0, 0);
-    currentFrameIndex = 0;
-    
-    imgTexture = new THREE.CanvasTexture(seqCanvas);
-    imgTexture.encoding = THREE.sRGBEncoding;
-    imgTexture.minFilter = THREE.LinearFilter;
-    imgTexture.magFilter = THREE.LinearFilter;
-    imgTexture.generateMipmaps = false;
-    
-    buildScene();
-    pin.classList.add('hero-in');
-  }
+  function drawImageCover(img) {
+    if (!img || !img.complete || img.naturalWidth === 0) return;
 
-  function calculateGeometry() {
-    winW = pin.clientWidth || window.innerWidth;
-    winH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
-    currentBp = getBreakpoint(winW);
-    config = SCENE_CONFIG[currentBp];
+    var cw = canvas.width;
+    var ch = canvas.height;
+    var iw = img.naturalWidth;
+    var ih = img.naturalHeight;
 
-    var imgAspect = seqCanvas.width / seqCanvas.height;
-    var viewportAspect = winW / winH;
-    
-    var isMobile = config.maxW <= 767;
-    
-    // For video sequences, we want it to perfectly cover the screen (like object-fit: cover)
-    // No artificial vertical travel needed since the video itself provides the motion!
-    planeHeight = winH;
-    planeWidth = planeHeight * imgAspect;
-    
-    if (planeWidth < winW) {
-      planeWidth = winW;
-      planeHeight = planeWidth / imgAspect;
-    }
-    
-    if (isMobile) {
-      fixedX = (planeWidth - winW) / 2 * 0.45;
+    var canvasAspect = cw / ch;
+    var imgAspect = iw / ih; // 1280 / 720 = 1.777778
+
+    var isMobile = (winW <= 767);
+    var isTablet = (winW > 767 && winW <= 1024);
+
+    var drawW, drawH, drawX, drawY;
+
+    if (canvasAspect > imgAspect) {
+      // Viewport is wider than 16:9 (e.g. wide desktop screen)
+      drawW = cw;
+      drawH = cw / imgAspect;
+      drawX = 0;
+      // Anchor slightly toward top so the elevator cabin (located at upper 20-60%) is never cropped
+      drawY = (ch - drawH) * 0.35;
     } else {
-      fixedX = (planeWidth - winW) / 2 * 0.15;
+      // Viewport is taller than 16:9 (e.g. mobile portrait, tablet portrait)
+      drawH = ch;
+      drawW = ch * imgAspect;
+      drawY = 0;
+
+      if (isMobile) {
+        // On mobile, focus on the elevator shaft (around 62% across the source width)
+        // Position it so the elevator cabin is centered in the viewport
+        drawX = cw * 0.52 - drawW * 0.62;
+        // Don't show empty space past right boundary
+        if (drawX + drawW < cw) drawX = cw - drawW;
+        if (drawX > 0) drawX = 0;
+      } else if (isTablet) {
+        drawX = cw * 0.55 - drawW * 0.60;
+        if (drawX + drawW < cw) drawX = cw - drawW;
+        if (drawX > 0) drawX = 0;
+      } else {
+        // Standard desktop: place elevator in the right portion, text on left
+        drawX = cw * 0.50 - drawW * 0.54;
+        if (drawX + drawW < cw) drawX = cw - drawW;
+        if (drawX > 0) drawX = 0;
+      }
     }
-    
-    if (camera) {
-      camera.left = winW / -2;
-      camera.right = winW / 2;
-      camera.top = winH / 2;
-      camera.bottom = winH / -2;
-      camera.updateProjectionMatrix();
-    }
-    
-    if (plane) {
-      plane.scale.set(planeWidth, planeHeight, 1);
-    }
-    
+
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(img, 0, 0, iw, ih, drawX, drawY, drawW, drawH);
   }
 
-  function buildScene() {
-    if (scene) {
-      scene.traverse(function(obj) {
-        if (obj.geometry) obj.geometry.dispose();
-      });
-      scene.clear();
-    } else {
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x111315);
-    }
-    
-    calculateGeometry();
-
-    camera = new THREE.OrthographicCamera(winW / -2, winW / 2, winH / 2, winH / -2, 0.1, 10);
-    camera.position.z = 5;
-
-    var geo = new THREE.PlaneGeometry(1, 1, 1, 1);
-
-    if (shaderMaterial) {
-      shaderMaterial.dispose();
+  function getBestAvailableFrame(targetIdx) {
+    if (frameImages[targetIdx] && frameImages[targetIdx].complete && frameImages[targetIdx].naturalWidth > 0) {
+      return { img: frameImages[targetIdx], idx: targetIdx };
     }
 
-    shaderMaterial = new THREE.MeshBasicMaterial({
-      map: imgTexture,
-      depthWrite: false
-    });
+    // Search outward for closest loaded frame
+    for (var dist = 1; dist < TOTAL_FRAMES; dist++) {
+      var prev = targetIdx - dist;
+      if (prev >= 0 && frameImages[prev] && frameImages[prev].complete && frameImages[prev].naturalWidth > 0) {
+        return { img: frameImages[prev], idx: prev };
+      }
+      var next = targetIdx + dist;
+      if (next < TOTAL_FRAMES && frameImages[next] && frameImages[next].complete && frameImages[next].naturalWidth > 0) {
+        return { img: frameImages[next], idx: next };
+      }
+    }
+    return null;
+  }
 
-    plane = new THREE.Mesh(geo, shaderMaterial);
-    plane.scale.set(planeWidth, planeHeight, 1);
-    scene.add(plane);
-
-    updateScrollProgress();
-    currentScrollProgress = targetScrollProgress;
-
-    if (!rafId) {
-      frame();
+  function drawCurrentFrame() {
+    var best = getBestAvailableFrame(currentFrameIndex >= 0 ? currentFrameIndex : 0);
+    if (best && best.img) {
+      drawImageCover(best.img);
     }
   }
 
   function updateScrollProgress() {
     var viewH = ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800;
     var rect = track.getBoundingClientRect();
-    
+
     isIntersecting = (rect.bottom > 0 && rect.top < viewH);
 
     var travel = Math.max(1, track.offsetHeight - viewH);
@@ -256,88 +165,176 @@
     targetScrollProgress = Math.max(0, Math.min(1, p));
   }
 
-  window.addEventListener('scroll', function() {
-    updateScrollProgress();
-  }, { passive: true });
+  function renderLoop() {
+    rafId = requestAnimationFrame(renderLoop);
 
-  document.addEventListener('visibilitychange', function() {
-    isHidden = document.hidden;
-  });
+    if (isHidden || !isIntersecting) return;
 
-  var resizeTimeout;
-  window.addEventListener('resize', function() {
-    if (resizeTimeout) clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-      if (renderer) {
-        var newW = pin.clientWidth || window.innerWidth;
-        var newBp = getBreakpoint(newW);
-        var oldConfig = config;
-        
-        renderer.setSize(newW, ((window.visualViewport && window.visualViewport.height) ? window.visualViewport.height : window.innerHeight) || window.innerHeight || 800, false);
-        if (newBp !== currentBp) {
-          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, SCENE_CONFIG[newBp].dpr));
-        }
-        calculateGeometry();
-        updateScrollProgress();
-      }
-    }, 150);
-  }, { passive: true });
-
-  function frame() {
-    rafId = requestAnimationFrame(frame);
-    
-    if (!scene || !camera || !renderer || isHidden || !isIntersecting) return;
-
+    var smoothing = (winW <= 767) ? 0.16 : 0.12;
     var deltaP = targetScrollProgress - currentScrollProgress;
-    currentScrollProgress += deltaP * config.smoothing;
-    if (isNaN(currentScrollProgress)) currentScrollProgress = 0;
-    
-    var p = currentScrollProgress;
+    currentScrollProgress += deltaP * smoothing;
 
-    // UPDATE FRAME SEQUENCE
-    var targetFrame = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(p * (TOTAL_FRAMES - 1))));
-    var targetImage = frameImages[targetFrame];
-    if (targetFrame !== currentFrameIndex && targetImage && targetImage.complete && targetImage.naturalWidth > 0) {
-      seqCtx.drawImage(targetImage, 0, 0);
-      imgTexture.needsUpdate = true;
-      currentFrameIndex = targetFrame;
+    if (isNaN(currentScrollProgress)) currentScrollProgress = 0;
+    if (Math.abs(currentScrollProgress - targetScrollProgress) < 0.0001) {
+      currentScrollProgress = targetScrollProgress;
     }
 
-    
+    var p = currentScrollProgress;
 
-    camera.position.x = fixedX;
-    camera.position.y = 0;
-    camera.lookAt(fixedX, 0, 0);
+    // Map scroll progress (0..1) to frame index (0..239)
+    var targetFrame = Math.max(0, Math.min(TOTAL_FRAMES - 1, Math.round(p * (TOTAL_FRAMES - 1))));
+
+    if (targetFrame !== currentFrameIndex) {
+      currentFrameIndex = targetFrame;
+      drawCurrentFrame();
+    }
 
     // UI Updates
     var carFloorF = p * (FLOORS - 1);
-    
+
     if (scenes && scenes.length >= 5) {
       for (var s = 0; s < 5; s++) {
         if (scenes[s]) {
-          scenes[s].classList.toggle('on', p >= sceneRanges[s][0] && p < sceneRanges[s][1]);
+          var on = (p >= sceneRanges[s][0] && p < sceneRanges[s][1]);
+          scenes[s].classList.toggle('on', on);
         }
       }
     }
+
     pin.classList.toggle('asc', p > 0.03);
 
-    if (reel && ldDir) {
+    // Floor indicator reel & arrow
+    if (reel) {
       var fl = Math.round(carFloorF);
       if (fl !== curFloor) {
         curFloor = fl;
         reel.style.transform = 'translateY(-' + fl + 'em)';
       }
-      
-      if (deltaP > 0.001) {
+    }
+
+    if (ldDir) {
+      if (deltaP > 0.0008) {
         ldDir.classList.remove('down');
         ldDir.classList.add('up');
-      } else if (deltaP < -0.001) {
+      } else if (deltaP < -0.0008) {
         ldDir.classList.remove('up');
         ldDir.classList.add('down');
       }
     }
+  }
 
-    renderer.render(scene, camera);
+  // Progressive Preloading Engine
+  function loadFrame(idx, onReady) {
+    if (frameImages[idx]) return;
+    var img = new Image();
+    img.onload = function() {
+      framesLoadedCount++;
+      if (Math.abs(idx - currentFrameIndex) <= 1) { drawCurrentFrame(); }
+      if (onReady) onReady(img, idx);
+    };
+    img.onerror = function() {
+      // Non-fatal: neighboring frames cover seamlessly
+      console.warn('Frame ' + idx + ' load skipped');
+    };
+    img.src = getFrameUrl(idx);
+    frameImages[idx] = img;
+  }
+
+  function startPreloading() {
+    // Step 1: Load Frame 1 FIRST and render immediately
+    loadFrame(0, function(img) {
+      isInitialFrameReady = true;
+      currentFrameIndex = 0;
+      resizeCanvas();
+      drawCurrentFrame();
+
+      // Show hero with clean fade-in
+      pin.classList.add('hero-in');
+
+      // Step 2: Load keyframes spread across the sequence (every 6th frame)
+      // This gives instant scrubbability from 0% to 100% within ~200ms
+      var keyframes = [];
+      for (var k = 0; k < TOTAL_FRAMES; k += 6) {
+        if (k !== 0) keyframes.push(k);
+      }
+      if (keyframes.indexOf(TOTAL_FRAMES - 1) === -1) {
+        keyframes.push(TOTAL_FRAMES - 1);
+      }
+
+      var keyframeQueue = keyframes.slice();
+      function loadNextKeyframeBatch() {
+        if (keyframeQueue.length === 0) {
+          loadRemainingFrames();
+          return;
+        }
+        var batch = keyframeQueue.splice(0, 6);
+        var loadedInBatch = 0;
+        batch.forEach(function(kIdx) {
+          loadFrame(kIdx, function() {
+            loadedInBatch++;
+            if (loadedInBatch === batch.length) {
+              loadNextKeyframeBatch();
+            }
+          });
+        });
+      }
+      loadNextKeyframeBatch();
+    });
+  }
+
+  function loadRemainingFrames() {
+    var remaining = [];
+    for (var i = 0; i < TOTAL_FRAMES; i++) {
+      if (!frameImages[i]) remaining.push(i);
+    }
+
+    var concurrentLimit = 6;
+    var activeCount = 0;
+
+    function next() {
+      if (remaining.length === 0) return;
+      while (activeCount < concurrentLimit && remaining.length > 0) {
+        var idx = remaining.shift();
+        activeCount++;
+        loadFrame(idx, function() {
+          activeCount--;
+          next();
+        });
+      }
+    }
+    next();
+  }
+
+  function init() {
+    resizeCanvas();
+    updateScrollProgress();
+    currentScrollProgress = targetScrollProgress;
+
+    startPreloading();
+
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+
+    document.addEventListener('visibilitychange', function() {
+      isHidden = document.hidden || false;
+    });
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function() {
+        resizeCanvas();
+        updateScrollProgress();
+      }, 120);
+    }, { passive: true });
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function() {
+        resizeCanvas();
+        updateScrollProgress();
+      });
+    }
+
+    renderLoop();
   }
 
   if (document.readyState === 'loading') {

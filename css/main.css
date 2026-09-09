@@ -692,20 +692,27 @@ body.no3d .hero-fallback {
   display: block;
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 75% 40%, rgba(227,30,36,0.1) 0%, transparent 60%),
-              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 14.28% 100%;
+  background-image: linear-gradient(
+    90deg,
+    rgba(17,19,21,.96) 0%,
+    rgba(17,19,21,.74) 38%,
+    rgba(17,19,21,.10) 72%
+  ), url("../assets/sequence/frame-0001.webp");
+  background-size: cover;
+  background-position: 62% center;
+  background-repeat: no-repeat;
 }
 
-body.no3d .hero-fallback::after {
-  content: "07";
-  position: absolute;
-  right: 6%;
-  top: 14%;
-  font: 800 clamp(5rem, 14vw, 13rem) var(--head);
-  color: transparent;
-  -webkit-text-stroke: 1.5px rgba(255,255,255,0.12);
-  pointer-events: none;
+@media (max-width: 767px) {
+  body.no3d .hero-fallback {
+    background-image: linear-gradient(
+      0deg,
+      rgba(17,19,21,.96) 0%,
+      rgba(17,19,21,.74) 45%,
+      rgba(17,19,21,.10) 80%
+    ), url("../assets/sequence/frame-0001.webp");
+    background-position: 60% center;
+  }
 }
 
 body.no3d .hero-s.s1 {
