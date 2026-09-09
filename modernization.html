@@ -10,7 +10,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=15">
+  <!-- Preload Before/After Slider Images -->
+  <link rel="preload" as="image" href="assets/elevator-before-modernization.jpg">
+  <link rel="preload" as="image" href="assets/elevator-after-modernization.jpg">
+  <link rel="stylesheet" href="css/main.css?v=16">
 </head>
 <body>
   <a class="skip" href="#mainContent">Skip to main content</a>
@@ -104,56 +107,47 @@
         </div>
 
         <!-- Before / After Slider -->
-        <div class="ba rv" id="baSlider">
-          <div class="ba-layer ba-old" aria-hidden="true">
-            <svg class="cabin" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
-              <rect class="wO" x="0" y="0" width="800" height="500"/>
-              <rect class="bkO" x="210" y="30" width="380" height="440"/>
-              <rect class="clO" x="0" y="0" width="800" height="52"/>
-              <rect class="flO" x="0" y="452" width="800" height="48"/>
-              <rect class="drO" x="300" y="80" width="200" height="372"/>
-              <line x1="400" y1="80" x2="400" y2="452" class="smO"/>
-              <rect class="inO" x="330" y="98" width="140" height="34"/>
-              <text class="inTO" x="400" y="122" text-anchor="middle">3</text>
-              <rect class="cpO" x="130" y="150" width="56" height="220"/>
-              <rect class="cpO" x="614" y="150" width="56" height="220"/>
-              <circle class="btO" cx="158" cy="180" r="9"/><circle class="btO" cx="158" cy="212" r="9"/><circle class="btO" cx="158" cy="244" r="9"/><circle class="btO" cx="158" cy="276" r="9"/><circle class="btO" cx="158" cy="308" r="9"/><circle class="btO" cx="158" cy="340" r="9"/>
-              <circle class="btO" cx="642" cy="180" r="9"/><circle class="btO" cx="642" cy="212" r="9"/><circle class="btO" cx="642" cy="244" r="9"/><circle class="btO" cx="642" cy="276" r="9"/><circle class="btO" cx="642" cy="308" r="9"/><circle class="btO" cx="642" cy="340" r="9"/>
-              <line x1="118" y1="400" x2="200" y2="400" class="rlO"/>
-              <line x1="600" y1="400" x2="682" y2="400" class="rlO"/>
-              <rect class="lpO" x="340" y="12" width="120" height="18"/>
-              <path d="M120 452 L180 430 M640 452 L700 430" class="scO" fill="none"/>
-              <path d="M60 440 q40 10 80 0" class="scO" fill="none"/>
-            </svg>
-            <span class="ba-tag">EXISTING ELEVATOR</span>
+        <div class="ba rv" id="baSlider" style="--pos: 50%;">
+          <!-- Existing elevator underneath (Before) -->
+          <div class="ba-layer ba-old">
+            <img src="assets/elevator-before-modernization.jpg" 
+                 srcset="assets/elevator-before-modernization.jpg 1024w, assets/elevator-before-modernization.png 1672w" 
+                 sizes="(max-width: 1024px) 100vw, 1200px"
+                 alt="Existing elevator interior before modernization" 
+                 width="1672" height="941" 
+                 loading="eager" 
+                 draggable="false">
           </div>
 
-          <div class="ba-layer ba-new" aria-hidden="true">
-            <svg class="cabin" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
-              <rect class="wN" x="0" y="0" width="800" height="500"/>
-              <rect class="bkN" x="210" y="30" width="380" height="440"/>
-              <rect class="clN" x="0" y="0" width="800" height="52"/>
-              <rect class="flN" x="0" y="452" width="800" height="48"/>
-              <rect class="drN" x="300" y="80" width="200" height="372"/>
-              <line x1="400" y1="80" x2="400" y2="452" class="smN"/>
-              <rect class="inN" x="330" y="98" width="140" height="34"/>
-              <text class="inTN" x="400" y="122" text-anchor="middle">3</text>
-              <rect class="cpN" x="130" y="150" width="56" height="220"/>
-              <rect class="cpN" x="614" y="150" width="56" height="220"/>
-              <circle class="btN" cx="158" cy="180" r="9"/><circle class="btN" cx="158" cy="212" r="9"/><circle class="btN" cx="158" cy="244" r="9"/><circle class="btR" cx="158" cy="276" r="9"/><circle class="btN" cx="158" cy="308" r="9"/><circle class="btN" cx="158" cy="340" r="9"/>
-              <circle class="btN" cx="642" cy="180" r="9"/><circle class="btN" cx="642" cy="212" r="9"/><circle class="btN" cx="642" cy="244" r="9"/><circle class="btN" cx="642" cy="276" r="9"/><circle class="btN" cx="642" cy="308" r="9"/><circle class="btN" cx="642" cy="340" r="9"/>
-              <line x1="118" y1="400" x2="200" y2="400" class="rlN"/>
-              <line x1="600" y1="400" x2="682" y2="400" class="rlN"/>
-              <rect class="lpN" x="340" y="12" width="120" height="18"/>
-              <line x1="30" y1="64" x2="770" y2="64" class="ledN"/>
-              <line x1="30" y1="446" x2="770" y2="446" class="ledN"/>
-            </svg>
-            <span class="ba-tag">MODERNIZED ELEVATOR</span>
+          <!-- Modernized elevator on top (After, revealed via clip-path) -->
+          <div class="ba-layer ba-new">
+            <img src="assets/elevator-after-modernization.jpg" 
+                 srcset="assets/elevator-after-modernization.jpg 1024w, assets/elevator-after-modernization.png 1672w" 
+                 sizes="(max-width: 1024px) 100vw, 1200px"
+                 alt="Elevator interior after professional modernization" 
+                 width="1672" height="941" 
+                 loading="eager" 
+                 draggable="false">
           </div>
 
+          <!-- Overlay Labels -->
+          <span class="ba-tag ba-tag-old" aria-hidden="true">EXISTING ELEVATOR</span>
+          <span class="ba-tag ba-tag-new" aria-hidden="true">MODERNIZED ELEVATOR</span>
+
+          <!-- Divider Line -->
           <div class="ba-line" aria-hidden="true"></div>
-          <button class="ba-handle" id="baHandle" role="slider" aria-label="Comparison slider — existing versus modernized cabin" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
-            <svg viewBox="0 0 24 24"><path d="M8 5l-6 7 6 7V5zM16 5l6 7-6 7V5z"/></svg>
+
+          <!-- Accessible Handle -->
+          <button class="ba-handle" id="baHandle" 
+                  role="slider" 
+                  aria-label="Compare existing and modernized elevator" 
+                  aria-valuemin="0" 
+                  aria-valuemax="100" 
+                  aria-valuenow="50" 
+                  tabindex="0">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8.5 7l-5 5 5 5M15.5 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
           </button>
         </div>
 
@@ -272,6 +266,6 @@
     </div>
   </footer>
 
-  <script src="js/main.js?v=15"></script>
+  <script src="js/main.js?v=16"></script>
 </body>
 </html>

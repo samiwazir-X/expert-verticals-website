@@ -407,42 +407,69 @@
 
     function baSet(val) {
       baValue = Math.max(0, Math.min(100, val));
-      if (baNew) baNew.style.clipPath = 'inset(0 0 0 ' + baValue + '%)';
-      if (baLine) baLine.style.left = baValue + '%';
-      baHandle.style.left = baValue + '%';
+      var posStr = baValue + '%';
+      baSlider.style.setProperty('--pos', posStr);
+      if (baNew) {
+        baNew.style.clipPath = 'inset(0 0 0 ' + posStr + ')';
+        baNew.style.webkitClipPath = 'inset(0 0 0 ' + posStr + ')';
+      }
+      if (baLine) baLine.style.left = posStr;
+      baHandle.style.left = posStr;
       baHandle.setAttribute('aria-valuenow', Math.round(baValue));
     }
 
     function baFromPointer(e) {
       var rect = baSlider.getBoundingClientRect();
       var clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+      if (typeof clientX !== 'number') return;
       var pos = ((clientX - rect.left) / rect.width) * 100;
       baSet(pos);
     }
 
     baSlider.addEventListener('pointerdown', function(e) {
       baDragging = true;
+      baSlider.classList.add('is-dragging');
+      try {
+        baSlider.setPointerCapture(e.pointerId);
+      } catch (err) {}
       baFromPointer(e);
     });
 
-    window.addEventListener('pointermove', function(e) {
+    baSlider.addEventListener('pointermove', function(e) {
       if (baDragging) {
-        e.preventDefault();
         baFromPointer(e);
       }
     });
 
-    window.addEventListener('pointerup', function() {
-      baDragging = false;
-    });
+    function endDrag(e) {
+      if (baDragging) {
+        baDragging = false;
+        baSlider.classList.remove('is-dragging');
+        if (e && e.pointerId) {
+          try {
+            baSlider.releasePointerCapture(e.pointerId);
+          } catch (err) {}
+        }
+      }
+    }
+
+    baSlider.addEventListener('pointerup', endDrag);
+    baSlider.addEventListener('pointercancel', endDrag);
 
     baHandle.addEventListener('keydown', function(e) {
-      if (e.key === 'ArrowLeft') {
+      var step = e.shiftKey ? 10 : 2;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         e.preventDefault();
-        baSet(baValue - 5);
-      } else if (e.key === 'ArrowRight') {
+        baSet(baValue - step);
+      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
-        baSet(baValue + 5);
+        baSet(baValue + step);
+      } else if (e.key === 'PageDown') {
+        e.preventDefault();
+        baSet(baValue - 10);
+      } else if (e.key === 'PageUp') {
+        e.preventDefault();
+        baSet(baValue + 10);
       } else if (e.key === 'Home') {
         e.preventDefault();
         baSet(0);
