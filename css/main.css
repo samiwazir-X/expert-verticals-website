@@ -3501,3 +3501,379 @@ html {
     bottom: 2rem !important;
   }
 }
+
+/* ==========================================================================
+   DUAL VERTICAL & FIRE FIGHTING COMPONENT STYLES
+   ========================================================================== */
+
+/* 1. Two Verticals Grid */
+.vert-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 28px;
+  margin-top: 36px;
+}
+
+.vert-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: clamp(28px, 4vw, 44px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.2,0.6,0.3,1), border-color 0.3s, box-shadow 0.3s;
+}
+
+.vert-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--red);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+
+.vert-card:hover {
+  transform: translateY(-4px);
+  border-color: #d0d4d8;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+}
+
+.vert-card:hover::before {
+  transform: scaleX(1);
+}
+
+.vert-card .vc-num {
+  font: 600 11px var(--mono);
+  letter-spacing: 0.18em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.vert-card h3 {
+  font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+  color: var(--char);
+  margin-bottom: 12px;
+}
+
+.vert-card p {
+  color: #4a5057;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* 2. Elevator SVG Icons Grid */
+.eicons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 20px;
+  margin-top: 36px;
+  margin-bottom: 48px;
+}
+
+.eicon-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+}
+
+.eicon-card:hover {
+  border-color: var(--red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+}
+
+.eicon-card .icon-wrap {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--off);
+  border: 1px solid var(--line);
+  padding: 8px;
+}
+
+.eicon-card img, .eicon-card svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.eicon-card h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--char);
+  letter-spacing: 0.02em;
+}
+
+/* Dedicated Elevator Cutaway Block */
+.eng-cutaway-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(32px, 5vw, 64px);
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: clamp(28px, 4vw, 48px);
+  margin-top: 36px;
+}
+
+@media(max-width: 900px) {
+  .eng-cutaway-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+.eng-cutaway-img {
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  display: block;
+}
+
+/* 3. Fire Fighting Homepage & Dedicated Page Styles */
+.fire-hero-panel {
+  position: relative;
+  background: var(--char2);
+  color: var(--off);
+  border: 1px solid var(--line-d);
+  overflow: hidden;
+  margin-top: 32px;
+}
+
+.fire-picture {
+  display: block;
+  width: 100%;
+}
+
+.fire-picture img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 540px;
+}
+
+.fire-content-box {
+  padding: clamp(28px, 4vw, 56px);
+}
+
+.fire-icons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-top: 36px;
+}
+
+.fire-icon-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 28px 24px;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+
+.dark .fire-icon-card {
+  background: var(--char2);
+  border-color: var(--line-d);
+  color: var(--off);
+}
+
+.fire-icon-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--red);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+}
+
+.fire-icon-card .fi-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.fire-icon-card .fi-icon {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  background: var(--off);
+  border: 1px solid var(--line);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .fire-icon-card .fi-icon {
+  background: var(--char);
+  border-color: var(--line-d);
+}
+
+.fire-icon-card .fi-icon img,
+.fire-icon-card .fi-icon svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.fire-icon-card h3 {
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  color: var(--char);
+  margin-bottom: 8px;
+}
+
+.dark .fire-icon-card h3 {
+  color: var(--off);
+}
+
+.fire-icon-card p {
+  color: #4a5057;
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.dark .fire-icon-card p {
+  color: var(--grey-l);
+}
+
+/* 4. Engineering Lifecycle Sequence Strip */
+.lifecycle-seq {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.lc-step {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 24px 18px;
+  position: relative;
+  text-align: left;
+}
+
+.lc-step .lc-num {
+  font: 700 12px var(--mono);
+  color: var(--red);
+  letter-spacing: 0.16em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.lc-step h3 {
+  font-size: 1rem;
+  text-transform: uppercase;
+  color: var(--char);
+  margin: 0;
+}
+
+/* 5. Industries Concise Grid */
+.ind-concise-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.ind-tag {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: 18px 20px;
+  font: 700 0.9rem var(--head);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--char);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ind-tag .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+}
+
+/* 6. Fire Fighting Page Specific Layouts */
+.fire-page-hero {
+  padding: clamp(48px, 6vw, 80px) 0 clamp(32px, 4vw, 56px);
+  background: var(--char);
+  color: var(--off);
+  border-bottom: 1px solid var(--line-d);
+}
+
+.fire-service-detail {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  padding: clamp(28px, 4vw, 44px);
+  margin-bottom: 28px;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 28px;
+  align-items: start;
+}
+
+@media(max-width: 640px) {
+  .fire-service-detail {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.fire-service-detail .fs-icon {
+  width: 68px;
+  height: 68px;
+  background: var(--off);
+  border: 1px solid var(--line);
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fire-service-detail h3 {
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  margin-bottom: 12px;
+  color: var(--char);
+}
+
+.fire-service-detail ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px 20px;
+}
+
+.fire-service-detail ul li {
+  font-size: 0.92rem;
+  color: #4a5057;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.fire-service-detail ul li::before {
+  content: "—";
+  color: var(--red);
+  font-weight: 700;
+}
+

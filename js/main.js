@@ -112,8 +112,8 @@
   }
 
   /* ============ ACTIVE SECTION SPY & FLOOR NAVIGATOR ============ */
-  var secIds = ['intro', 'about', 'solutions', 'coordinate', 'sectors', 'engineering', 'service', 'institutional', 'contact'];
-  var darkIds = ['engineering', 'contact'];
+  var secIds = ['verticals', 'elevators', 'firefighting', 'lifecycle', 'industries', 'maintenance', 'procurement', 'contact', 'intro', 'about', 'solutions', 'coordinate', 'sectors', 'engineering', 'service', 'institutional'];
+  var darkIds = ['firefighting', 'engineering', 'contact'];
 
   if ('IntersectionObserver' in window) {
     var secIO = new IntersectionObserver(function(entries) {
@@ -137,6 +137,33 @@
       if (el) secIO.observe(el);
     });
   }
+
+  /* ============ QUERY PARAMETER FORM PRE-SELECTION ============ */
+  (function initQueryParamPreselection() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var solParam = (params.get('solution') || params.get('type') || '').toLowerCase();
+      if (!solParam) return;
+
+      var typeSelects = document.querySelectorAll('select#fType, select#cType, select[name="type"], select[name="solution_type"]');
+      typeSelects.forEach(function(select) {
+        for (var i = 0; i < select.options.length; i++) {
+          var optVal = select.options[i].value.toLowerCase();
+          var optText = select.options[i].text.toLowerCase();
+          if (
+            (solParam.indexOf('fire') !== -1 && (optVal.indexOf('fire') !== -1 || optText.indexOf('fire') !== -1)) ||
+            (solParam.indexOf('elevator') !== -1 && (optVal.indexOf('elevator') !== -1 || optText.indexOf('elevator') !== -1)) ||
+            (solParam.indexOf('both') !== -1 || solParam.indexOf('integrated') !== -1) && (optVal.indexOf('both') !== -1 || optVal.indexOf('integrated') !== -1 || optText.indexOf('both') !== -1)
+          ) {
+            select.selectedIndex = i;
+            break;
+          }
+        }
+      });
+    } catch (e) {
+      // Fallback for older browsers
+    }
+  })();
 
   /* ============ SOLUTIONS INTERACTIVE TABS ============ */
   var solutionsData = [
