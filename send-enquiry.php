@@ -134,7 +134,10 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
         );
     }
 
-    // Allowed MIME types / extensions
+    // Allowed MIME types & extensions (PDF, DOC, DOCX, XLS, XLSX, JPG, PNG)
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
+
     $allowedMimes = [
         'application/pdf',
         'application/msword',
@@ -142,17 +145,19 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'image/jpeg',
-        'image/png'
+        'image/png',
+        'application/octet-stream',
+        'application/zip',
+        'application/x-zip-compressed'
     ];
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = finfo_file($finfo, $file['tmp_name']);
-    finfo_close($finfo);
+    $mimeType = $finfo ? finfo_file($finfo, $file['tmp_name']) : $file['type'];
+    if ($finfo) {
+        finfo_close($finfo);
+    }
 
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
-
-    if (!in_array($mimeType, $allowedMimes) && !in_array($ext, $allowedExts)) {
+    if (!in_array($ext, $allowedExts) || !in_array($mimeType, $allowedMimes)) {
         sendResponse(
             false,
             'We could not submit your enquiry. Attachment format not allowed (PDF, DOC, DOCX, XLS, XLSX, JPG, PNG only). Please call +92 333 3533058 or email info@expertverticals.com.',
