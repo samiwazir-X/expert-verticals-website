@@ -418,25 +418,31 @@ h1, h2, h3, h4, h5, h6 {
   gap: 20px;
 }
 
+.site-logo,
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 13px;
+  flex: 0 0 auto;
+  line-height: 0;
   text-decoration: none;
   color: var(--off);
-  min-height: 44px;
 }
 
+.site-logo__image,
 .brand-img {
-  height: 44px;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
   display: block;
+  width: auto;
+  height: 48px;
+  max-width: none;
+  object-fit: contain;
+  object-position: left center;
+  flex: 0 0 auto;
 }
 
 @media (max-width: 768px) {
+  .site-logo__image,
   .brand-img {
+    width: auto;
     height: 36px;
   }
 }
