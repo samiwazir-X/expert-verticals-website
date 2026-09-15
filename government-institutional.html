@@ -21,8 +21,8 @@
       <div class="u-l">Expert Verticals • Government, Public Sector &amp; Institutional Procurement Desk</div>
       <div class="u-r">
         <span>Rawalpindi</span><span>Karachi</span>
-        <a href="mailto:info@theexpert.pk">info@theexpert.pk</a>
-        <a href="tel:+92512314150">051-2314150</a>
+        <a href="mailto:info@expertverticals.com">info@expertverticals.com</a>
+        <a href="tel:+923333533058">+92 333 3533058</a>
       </div>
     </div>
   </div>
@@ -68,9 +68,10 @@
     <div class="m-foot">
       <a class="btn btn-red" href="contact.html">Request a Proposal</a>
       <div class="m-foot-contact">
+        <a href="tel:+923333533058">Primary: +92 333 3533058</a>
         <a href="tel:+92512314150">Rawalpindi: 051-2314150</a>
         <a href="tel:+922137227345">Karachi: +92 21 37227345</a>
-        <a href="mailto:info@theexpert.pk">info@theexpert.pk</a>
+        <a href="mailto:info@expertverticals.com">info@expertverticals.com</a>
       </div>
     </div>
   </div>
@@ -146,7 +147,8 @@
             <h2>Submit Tender Documents / BOQs for Evaluation<span class="rdot">.</span></h2>
           </div>
 
-          <form class="rfq rv" data-rfq="true" novalidate>
+          <form class="rfq rv" data-rfq="true" action="/send-enquiry.php" method="POST" enctype="multipart/form-data" novalidate>
+            <input type="text" name="website_hp" style="display:none !important;" tabindex="-1" autocomplete="off" aria-hidden="true">
             <p class="form-h">Institutional Tender / BOQ Review</p>
             <p class="form-s">Submit tender notices, RFQ documents, or technical specifications for formal review by our engineering desk.</p>
             
@@ -190,6 +192,11 @@
               </div>
 
               <div class="fg full">
+                <label for="tFile">Attach Tender Notice / BOQ Document (PDF, DOC, XLS - Max 10MB)</label>
+                <input id="tFile" name="attachment" type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.png">
+              </div>
+
+              <div class="fg full">
                 <label class="consent">
                   <input type="checkbox" id="tConsent" name="consent" required>
                   <span>I authorize Expert Verticals to review the information provided for bidding or quotation. <em style="color:var(--red);font-style:normal">*</em></span>
@@ -198,7 +205,7 @@
 
               <div class="fg full">
                 <button class="btn btn-red" type="submit">
-                  Prepare Tender Review Email <svg class="ic ic-st" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>
+                  Submit Tender Enquiry <svg class="ic ic-st" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>
                 </button>
               </div>
             </div>
@@ -211,8 +218,8 @@
   <!-- Sticky Mobile Bar -->
   <div class="mobile-action-bar" aria-label="Quick contact actions">
     <div class="bar-wrap">
-      <a href="tel:+92512314150">Call</a>
-      <a href="mailto:info@theexpert.pk">Email</a>
+      <a href="tel:+923333533058">Call</a>
+      <a href="mailto:info@expertverticals.com">Email</a>
       <a href="contact.html" class="bar-cta">Request Quote</a>
     </div>
   </div>
@@ -249,9 +256,10 @@
         <div>
           <h4>Headquarters</h4>
           <ul>
+            <li><a href="tel:+923333533058">Primary: +92 333 3533058</a></li>
             <li><a href="tel:+92512314150">Rawalpindi: 051-2314150</a></li>
             <li><a href="tel:+922137227345">Karachi: +92 21 37227345</a></li>
-            <li><a href="mailto:info@theexpert.pk">info@theexpert.pk</a></li>
+            <li><a href="mailto:info@expertverticals.com">info@expertverticals.com</a></li>
           </ul>
         </div>
       </div>

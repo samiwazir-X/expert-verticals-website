@@ -524,6 +524,16 @@
   var rfqForms = document.querySelectorAll('form.rfq, form[data-rfq="true"]');
 
   rfqForms.forEach(function(form) {
+    if (!form.getAttribute('action')) {
+      form.setAttribute('action', '/send-enquiry.php');
+    }
+    if (!form.getAttribute('method')) {
+      form.setAttribute('method', 'POST');
+    }
+    if (!form.getAttribute('enctype')) {
+      form.setAttribute('enctype', 'multipart/form-data');
+    }
+
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       var isValid = true;
@@ -556,39 +566,54 @@
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = 'PREPARING EMAIL...';
+        submitBtn.innerHTML = 'SUBMITTING ENQUIRY...';
       }
 
       trackEvent('rfq_form_submitted', {
         page: window.location.pathname,
-        solutionType: (form.querySelector('[name="type"]') || {}).value || ''
+        solutionType: (form.querySelector('[name="type"]') || form.querySelector('[name="service"]') || {}).value || ''
       });
 
-      var getValue = function(name) {
-        var field = form.querySelector('[name="' + name + '"]');
-        return field ? field.value.trim() : '';
-      };
-      var solutionType = getValue('type') || 'General enquiry';
-      var subject = 'Expert Verticals enquiry — ' + solutionType;
-      var bodyLines = [];
-      form.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(field) {
-        if (field.type === 'checkbox' || field.type === 'radio' || field.type === 'file') return;
-        var value = field.value.trim();
-        if (!value) return;
-        var label = field.id ? form.querySelector('label[for="' + field.id + '"]') : null;
-        var labelText = label ? label.textContent.replace('*', '').trim() : field.name;
-        bodyLines.push(labelText + ': ' + value);
-      });
-      var body = bodyLines.join('\n\n');
+      var formData = new FormData(form);
+      var endpoint = form.getAttribute('action') || '/send-enquiry.php';
 
-      window.location.href = 'mailto:info@theexpert.pk?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      showToast('Your email application has been opened with the enquiry details.');
-      setTimeout(function() {
+      fetch(endpoint, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(function(res) {
+        return res.json().then(function(data) {
+          return { ok: res.ok, status: res.status, data: data };
+        }).catch(function() {
+          return { ok: res.ok, status: res.status, data: null };
+        });
+      })
+      .then(function(result) {
+        if (result.ok && result.data && result.data.success) {
+          showToast(result.data.message || 'Thank you. Your enquiry has been submitted successfully. Our team will contact you shortly.');
+          form.reset();
+          form.querySelectorAll('.fg.err').forEach(function(fg) {
+            fg.classList.remove('err');
+          });
+        } else {
+          var errorMsg = (result.data && result.data.message) 
+            ? result.data.message 
+            : 'We could not submit your enquiry. Please try again, call +92 333 3533058, or email info@expertverticals.com.';
+          showToast(errorMsg);
+        }
+      })
+      .catch(function() {
+        showToast('We could not submit your enquiry. Please try again, call +92 333 3533058, or email info@expertverticals.com.');
+      })
+      .finally(function() {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHtml;
         }
-      }, 800);
+      });
     });
   });
 
