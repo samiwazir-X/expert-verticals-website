@@ -107,10 +107,122 @@ if (!empty($errors)) {
     );
 }
 
-// 5. File Attachment Processing (Optional)
-$attachmentPath = null;
-$attachmentName = null;
-$attachmentType = null;
+// Helper: Strict Pair-Matching Document Attachment Validator
+function validateDocumentAttachment(string $tmpPath, string $filename, string &$detectedMime): bool {
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+    if (!in_array($ext, $allowedExts, true)) {
+        return false;
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime = $finfo ? finfo_file($finfo, $tmpPath) : '';
+    if ($finfo) {
+        finfo_close($finfo);
+    }
+    $detectedMime = $mime;
+
+    // Do NOT accept application/octet-stream by itself unless verified by internal format signature
+    if ($mime === 'application/octet-stream' && !in_array($ext, ['doc', 'xls', 'docx', 'xlsx'], true)) {
+        return false;
+    }
+
+    // 1. PDF Validation: MIME + %PDF- magic signature
+    if ($ext === 'pdf') {
+        if ($mime !== 'application/pdf' && $mime !== 'application/x-pdf') {
+            return false;
+        }
+        $handle = @fopen($tmpPath, 'rb');
+        if (!$handle) {
+            return false;
+        }
+        $header = fread($handle, 5);
+        fclose($handle);
+        return ($header === '%PDF-');
+    }
+
+    // 2. DOC & XLS Validation: OLE Compound Document signature (D0 CF 11 E0 A1 B1 1A E1)
+    if ($ext === 'doc' || $ext === 'xls') {
+        $allowedDocMimes = ['application/msword', 'application/x-msword', 'application/cdfv2', 'application/x-ole-storage', 'application/octet-stream'];
+        $allowedXlsMimes = ['application/vnd.ms-excel', 'application/msexcel', 'application/x-msexcel', 'application/cdfv2', 'application/x-ole-storage', 'application/octet-stream'];
+        $validMimes = ($ext === 'doc') ? $allowedDocMimes : $allowedXlsMimes;
+
+        if (!in_array($mime, $validMimes, true)) {
+            return false;
+        }
+
+        $handle = @fopen($tmpPath, 'rb');
+        if (!$handle) {
+            return false;
+        }
+        $header = fread($handle, 8);
+        fclose($handle);
+        $oleMagic = "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1";
+        return ($header === $oleMagic);
+    }
+
+    // 3. DOCX Validation: ZipArchive inspection requiring [Content_Types].xml + word/document.xml
+    if ($ext === 'docx') {
+        $validDocxMimes = [
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/octet-stream'
+        ];
+        if (!in_array($mime, $validDocxMimes, true)) {
+            return false;
+        }
+
+        if (class_exists('ZipArchive')) {
+            $zip = new ZipArchive();
+            if ($zip->open($tmpPath) === true) {
+                $hasContentTypes = ($zip->locateName('[Content_Types].xml') !== false);
+                $hasWordDocument = ($zip->locateName('word/document.xml') !== false);
+                $zip->close();
+                return ($hasContentTypes && $hasWordDocument);
+            }
+            return false;
+        }
+
+        $handle = @fopen($tmpPath, 'rb');
+        if (!$handle) return false;
+        $header = fread($handle, 4);
+        fclose($handle);
+        return ($header === "PK\x03\x04");
+    }
+
+    // 4. XLSX Validation: ZipArchive inspection requiring [Content_Types].xml + xl/workbook.xml
+    if ($ext === 'xlsx') {
+        $validXlsxMimes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/zip',
+            'application/x-zip-compressed',
+            'application/octet-stream'
+        ];
+        if (!in_array($mime, $validXlsxMimes, true)) {
+            return false;
+        }
+
+        if (class_exists('ZipArchive')) {
+            $zip = new ZipArchive();
+            if ($zip->open($tmpPath) === true) {
+                $hasContentTypes = ($zip->locateName('[Content_Types].xml') !== false);
+                $hasWorkbook = ($zip->locateName('xl/workbook.xml') !== false);
+                $zip->close();
+                return ($hasContentTypes && $hasWorkbook);
+            }
+            return false;
+        }
+
+        $handle = @fopen($tmpPath, 'rb');
+        if (!$handle) return false;
+        $header = fread($handle, 4);
+        fclose($handle);
+        return ($header === "PK\x03\x04");
+    }
+
+    return false;
+}
 
 if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ERR_NO_FILE) {
     $file = $_FILES['attachment'];
@@ -134,28 +246,10 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
         );
     }
 
-    // Allowed MIME types & extensions (PDF, DOC, DOCX, XLS, XLSX only)
-    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
+    $detectedMime = '';
+    $isValidAttachment = validateDocumentAttachment($file['tmp_name'], $file['name'], $detectedMime);
 
-    $allowedMimes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/octet-stream',
-        'application/zip',
-        'application/x-zip-compressed'
-    ];
-
-    $finfo = finfo_open(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo ? finfo_file($finfo, $file['tmp_name']) : $file['type'];
-    if ($finfo) {
-        finfo_close($finfo);
-    }
-
-    if (!in_array($ext, $allowedExts) || !in_array($mimeType, $allowedMimes)) {
+    if (!$isValidAttachment) {
         sendResponse(
             false,
             'We could not submit your enquiry. Attachment format not allowed (PDF, DOC, DOCX, XLS, XLSX only). Please call +92 333 3533058 or email info@expertverticals.com.',
@@ -166,7 +260,7 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
 
     $attachmentPath = $file['tmp_name'];
     $attachmentName = basename($file['name']);
-    $attachmentType = $mimeType;
+    $attachmentType = $detectedMime;
 }
 
 // 6. Build Email
