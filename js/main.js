@@ -524,38 +524,6 @@
   var rfqForms = document.querySelectorAll('form.rfq, form[data-rfq="true"]');
 
   rfqForms.forEach(function(form) {
-    var fileInput = form.querySelector('input[type="file"]');
-    var fileNameSpan = form.querySelector('.filebtn span, #fileName');
-
-    if (fileInput && fileNameSpan) {
-      fileInput.addEventListener('change', function() {
-        var file = fileInput.files[0];
-        if (file) {
-          // File size limit: 10 MB (10 * 1024 * 1024 bytes)
-          if (file.size > 10 * 1024 * 1024) {
-            showToast('File exceeds 10 MB limit. Please compress or email to info@theexpert.pk');
-            fileInput.value = '';
-            fileNameSpan.textContent = 'Choose file…';
-            return;
-          }
-          // File extensions check
-          var allowed = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
-          var name = file.name.toLowerCase();
-          var isAllowed = allowed.some(function(ext) { return name.endsWith(ext); });
-          if (!isAllowed) {
-            showToast('Invalid file format. Please upload PDF, DOCX, or XLSX.');
-            fileInput.value = '';
-            fileNameSpan.textContent = 'Choose file…';
-            return;
-          }
-          fileNameSpan.textContent = file.name;
-          trackEvent('boq_file_attached', { fileName: file.name, size: file.size });
-        } else {
-          fileNameSpan.textContent = 'Choose file…';
-        }
-      });
-    }
-
     form.addEventListener('submit', function(e) {
       e.preventDefault();
       var isValid = true;
@@ -588,57 +556,39 @@
 
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = 'SUBMITTING...';
+        submitBtn.innerHTML = 'PREPARING EMAIL...';
       }
 
       trackEvent('rfq_form_submitted', {
         page: window.location.pathname,
-        name: (form.querySelector('[name="name"]') || {}).value || '',
-        org: (form.querySelector('[name="org"]') || {}).value || '',
-        email: (form.querySelector('[name="email"]') || {}).value || ''
+        solutionType: (form.querySelector('[name="type"]') || {}).value || ''
       });
 
-      // FORM ENDPOINT CONFIGURATION REQUIRED
-      // Please replace this URL with your actual static form provider endpoint (e.g., Formspree, Web3Forms).
-      var formEndpoint = 'FORM_ENDPOINT_CONFIGURATION_REQUIRED';
+      var getValue = function(name) {
+        var field = form.querySelector('[name="' + name + '"]');
+        return field ? field.value.trim() : '';
+      };
+      var solutionType = getValue('type') || 'General enquiry';
+      var subject = 'Expert Verticals enquiry — ' + solutionType;
+      var bodyLines = [];
+      form.querySelectorAll('input[name], select[name], textarea[name]').forEach(function(field) {
+        if (field.type === 'checkbox' || field.type === 'radio' || field.type === 'file') return;
+        var value = field.value.trim();
+        if (!value) return;
+        var label = field.id ? form.querySelector('label[for="' + field.id + '"]') : null;
+        var labelText = label ? label.textContent.replace('*', '').trim() : field.name;
+        bodyLines.push(labelText + ': ' + value);
+      });
+      var body = bodyLines.join('\n\n');
 
-      if (formEndpoint === 'FORM_ENDPOINT_CONFIGURATION_REQUIRED') {
-        setTimeout(function() {
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = origBtnHtml;
-          }
-          // Do not fake success; throw explicit configuration error.
-          showToast('Form endpoint configuration required. Please email us directly at info@theexpert.pk in the meantime.');
-        }, 800);
-        return;
-      }
-
-      // If configured, use fetch to submit
-      var formData = new FormData(form);
-      fetch(formEndpoint, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        }
-      }).then(function(response) {
-        if (response.ok) {
-          form.reset();
-          if (fileNameSpan) fileNameSpan.textContent = 'Choose file…';
-          form.querySelectorAll('.fg.err').forEach(function(f) { f.classList.remove('err'); });
-          showToast('Thank You. Your enquiry has been received. The Expert Verticals team will review and respond shortly.');
-        } else {
-          showToast('There was a problem submitting your form. Please try again or email us.');
-        }
-      }).catch(function(error) {
-        showToast('Network error. Please check your connection and try again.');
-      }).finally(function() {
+      window.location.href = 'mailto:info@theexpert.pk?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      showToast('Your email application has been opened with the enquiry details.');
+      setTimeout(function() {
         if (submitBtn) {
           submitBtn.disabled = false;
           submitBtn.innerHTML = origBtnHtml;
         }
-      });
+      }, 800);
     });
   });
 
