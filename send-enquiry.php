@@ -134,9 +134,9 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
         );
     }
 
-    // Allowed MIME types & extensions (PDF, DOC, DOCX, XLS, XLSX, JPG, PNG)
+    // Allowed MIME types & extensions (PDF, DOC, DOCX, XLS, XLSX only)
     $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'jpg', 'jpeg', 'png'];
+    $allowedExts = ['pdf', 'doc', 'docx', 'xls', 'xlsx'];
 
     $allowedMimes = [
         'application/pdf',
@@ -144,8 +144,6 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         'application/vnd.ms-excel',
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'image/jpeg',
-        'image/png',
         'application/octet-stream',
         'application/zip',
         'application/x-zip-compressed'
@@ -160,7 +158,7 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] !== UPLOAD_ER
     if (!in_array($ext, $allowedExts) || !in_array($mimeType, $allowedMimes)) {
         sendResponse(
             false,
-            'We could not submit your enquiry. Attachment format not allowed (PDF, DOC, DOCX, XLS, XLSX, JPG, PNG only). Please call +92 333 3533058 or email info@expertverticals.com.',
+            'We could not submit your enquiry. Attachment format not allowed (PDF, DOC, DOCX, XLS, XLSX only). Please call +92 333 3533058 or email info@expertverticals.com.',
             [],
             400
         );
