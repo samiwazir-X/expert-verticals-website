@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css?v=19">
+  <link rel="stylesheet" href="css/main.css?v=20">
 </head>
 <body>
   <a class="skip" href="#mainContent">Skip to main content</a>
@@ -107,28 +107,33 @@
     <!-- Page Hero Banner -->
     <header class="fire-page-hero">
       <div class="wrap">
-        <div class="breadcrumbs">
+        <div class="breadcrumbs fire-page-breadcrumbs">
           <a href="index.html">Home</a><span class="sep">/</span><span>Fire Fighting &amp; Life Safety</span>
         </div>
-        <p class="eyebrow">FIRE FIGHTING &amp; LIFE SAFETY</p>
-        <h1>Protection, Engineered In<span class="rdot">.</span></h1>
-        <p class="lead">Detection, suppression and readiness—engineered as one coordinated system designed to applicable project requirements and codes.</p>
+        <h1>Protection,<br>Engineered In<span class="rdot">.</span></h1>
+        <p class="lead">Integrated detection, suppression and emergency-response systems engineered around project requirements, hazard classifications and applicable codes.</p>
+        <div class="fire-page-actions">
+          <a class="btn btn-red" href="contact.html?solution=fire-fighting">Discuss a Fire Safety Project</a>
+          <a class="tlink fire-page-cap-link" href="#capabilities">View Capabilities
+            <svg class="ic ic-st" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>
+          </a>
+        </div>
       </div>
     </header>
 
     <!-- Primary Fire Photography -->
-    <section class="sec" style="padding-top: 40px; padding-bottom: 20px;">
+    <section class="fire-page-visual" aria-label="Integrated fire protection engineering">
       <div class="wrap">
-        <picture class="fire-picture">
+        <picture class="fire-picture fire-picture--hero">
           <source srcset="assets/images/fire-integrated-systems-1200.webp" media="(max-width: 1200px)" type="image/webp">
           <source srcset="assets/images/fire-integrated-systems.webp" type="image/webp">
-          <img src="assets/images/fire-integrated-systems.png" width="1672" height="941" alt="Fire-safety engineer inspecting an integrated hydrant, sprinkler and alarm installation" loading="eager" style="border: 1px solid var(--line); width: 100%;">
+          <img src="assets/images/fire-integrated-systems.png" width="1672" height="941" alt="Fire-safety engineer inspecting an integrated hydrant, sprinkler and alarm installation" loading="eager">
         </picture>
       </div>
     </section>
 
     <!-- Detailed Scope Sections -->
-    <section class="sec">
+    <section class="sec" id="capabilities">
       <div class="wrap">
         <div class="sec-head">
           <p class="sec-meta"><span class="no">01</span><span class="rule"></span><span>Scope &amp; Capabilities</span></p>
