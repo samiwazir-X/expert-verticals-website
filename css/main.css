@@ -3938,19 +3938,108 @@ html {
 
 /* 6. Fire Fighting Page Specific Layouts */
 .fire-page-hero {
-  padding: clamp(48px, 6vw, 80px) 0 clamp(32px, 4vw, 56px);
+  padding: clamp(54px, 5.2vw, 72px) 0 clamp(44px, 4vw, 58px);
   background: var(--char);
   color: var(--off);
   border-bottom: 1px solid var(--line-d);
+  overflow: hidden;
+}
+
+.fire-page-breadcrumbs {
+  margin-bottom: clamp(22px, 2.4vw, 30px);
+  color: var(--grey-l);
+  opacity: 0.92;
 }
 
 .fire-page-hero h1 {
-  font-size: clamp(2.5rem, 6vw, 5.4rem);
-  max-width: 14ch;
+  font-size: clamp(2.9rem, 5vw, 4.65rem);
+  line-height: 0.92;
+  max-width: 10ch;
+  margin: 0 0 clamp(20px, 2.3vw, 28px);
+  text-wrap: balance;
 }
 
 .fire-page-hero .lead {
-  max-width: 62ch;
+  max-width: 58ch;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  line-height: 1.62;
+  color: #c8ccd0;
+  margin: 0;
+}
+
+.fire-page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px 28px;
+  margin-top: clamp(26px, 3vw, 36px);
+}
+
+.fire-page-cap-link {
+  color: var(--off);
+  border-color: rgba(255,255,255,0.22);
+}
+
+.fire-page-cap-link:hover {
+  color: var(--red);
+  border-color: var(--red);
+}
+
+.fire-page-visual {
+  background: var(--off);
+  padding: clamp(28px, 3vw, 38px) 0 clamp(18px, 2vw, 26px);
+}
+
+.fire-picture--hero {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--char2);
+}
+
+.fire-picture--hero img {
+  width: 100%;
+  height: clamp(300px, 39vw, 520px);
+  aspect-ratio: 16 / 7.6;
+  object-fit: cover;
+  object-position: center 48%;
+}
+
+@media (max-width: 720px) {
+  .fire-page-hero {
+    padding: 40px 0 38px;
+  }
+
+  .fire-page-breadcrumbs {
+    margin-bottom: 18px;
+  }
+
+  .fire-page-hero h1 {
+    font-size: clamp(2.5rem, 12vw, 3.4rem);
+    line-height: 0.94;
+    max-width: 9ch;
+  }
+
+  .fire-page-actions {
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .fire-page-actions .btn {
+    width: 100%;
+  }
+
+  .fire-page-cap-link {
+    width: fit-content;
+  }
+
+  .fire-page-visual {
+    padding-top: 20px;
+  }
+
+  .fire-picture--hero img {
+    height: clamp(240px, 70vw, 360px);
+    aspect-ratio: auto;
+  }
 }
 
 .fire-services-grid {
