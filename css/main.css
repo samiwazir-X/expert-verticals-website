@@ -422,28 +422,73 @@ h1, h2, h3, h4, h5, h6 {
 .brand {
   display: inline-flex;
   align-items: center;
+  gap: 12px;
   flex: 0 0 auto;
-  line-height: 0;
+  min-width: 186px;
+  height: 58px;
+  line-height: 1;
   text-decoration: none;
   color: var(--off);
+}
+
+.site-logo__mark {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+}
+
+.site-logo__wordmark {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  color: var(--off);
+  font-family: var(--head);
+  font-size: 18px;
+  font-weight: 800;
+  line-height: .92;
+  letter-spacing: .01em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.site-logo__wordmark span {
+  display: block;
 }
 
 .site-logo__image,
 .brand-img {
   display: block;
-  width: auto;
-  height: 48px;
-  max-width: none;
-  object-fit: contain;
+  width: 180px !important;
+  height: auto !important;
+  max-width: 180px !important;
+  object-fit: contain !important;
   object-position: left center;
   flex: 0 0 auto;
 }
 
 @media (max-width: 768px) {
+  .site-logo,
+  .brand {
+    min-width: 156px;
+    height: 50px;
+    gap: 10px;
+  }
+
+  .site-logo__mark {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+
+  .site-logo__wordmark {
+    font-size: 15px;
+  }
+
   .site-logo__image,
   .brand-img {
-    width: auto;
-    height: 36px;
+    width: 150px !important;
+    height: auto !important;
+    max-width: 150px !important;
   }
 }
 
